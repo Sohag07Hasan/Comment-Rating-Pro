@@ -1,0 +1,70 @@
+This is a brief guide to customize using the Comment Rating internal
+functions.  These functions are accessible globaly as soon as the
+plugin is enabled.
+
+1. To access the rating of a comment:
+   To avoid duplicated database access, Comment Rating use an cache
+   "$ck_cache" hash array, defined as,
+      $ck_cache = array('ck_ips'=>"", 'ck_comment_id'=>0, 'ck_rating_up'=>0, 'ck_rating_down'=>0)
+   You should use it as a global variable. Here's the code.
+      global $ck_cache;
+      ckrating_get_rating($comment_ID);
+
+   Then, all the related content will be accessible.
+      $ck_cache['ck_comment_id']
+      $ck_cache['ck_ips'] 
+      $ck_cache['ck_rating_up'] 
+      $ck_cache['ck_rating_down'] 
+
+
+2. If you want to do tight integration with your theme in placement
+and style, you will need to insert the following  line into your
+theme "comments.php" file within the comment loop.
+
+<?php  if(function_exists(ckrating_display_karma)) { ckrating_display_karma(); } ?>
+
+
+3. Order comments by their rating.
+   Configure the value for "comment_karma" field (Likes, Dislikes or
+   Both) in Comment Rating Options.  Then use the following code to
+   retrieve comments for a specific post.
+
+   If your theme uses wp_list_comments(), use the following
+      if (function_exists(ckrating_get_comments)) {
+         $post_id = $post->ID;
+         $mycomments = ckrating_get_comments("post_id=$post_id&status=approve&orderby=comment_karma&order=DESC");
+      }
+      else
+         $mycomments = null;
+      wp_list_comments(array(), $mycomments);
+
+   Otherwise, use the following,
+
+      $post_id = $post->ID;
+      if (function_exists(ckrating_get_comments)) 
+         $comments = ckrating_get_comments("post_id=$post_id&status=approve&orderby=comment_karma&order=DESC");
+      else
+         $comments = get_comments("post_id=$post_id&status=approve&order=DESC");
+
+      foreach($comments as $comm) :
+         echo($comm->comment_author);
+      endforeach;
+
+4. If you want to style the comment images and text, you can define a CSS class in
+   your style file "CommentRating".  For example, the following will
+   show the comment rating images and text on the right.
+
+   .CommentRating {
+      text-align: right;
+      float: right;
+   }
+
+5. Another problem which could cause display icons and numbers in
+each line is caused by "display: block"
+
+.commentlist small {
+	margin-bottom: 5px;
+	display: block;
+	font-size: 87%;
+}
+
